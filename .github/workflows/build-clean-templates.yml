@@ -7,6 +7,7 @@ on:
     paths:
       - "schema/**"
       - "tools/build_clean_templates.py"
+      - "tools/verify_templates.py"
       - ".github/workflows/build-clean-templates.yml"
 
 permissions:
@@ -22,13 +23,10 @@ jobs:
           python-version: "3.12"
       - name: Install GIS dependencies
         run: python -m pip install --upgrade pip geopandas pyogrio pandas
-      - name: Build 35 clean FileGDB ZIPs
+      - name: Build 35 normalized clean FileGDB ZIPs
         run: python tools/build_clean_templates.py --out templates/generated --jobs 4
-      - name: Sanity check package count
-        shell: bash
-        run: |
-          count=$(find templates/generated -maxdepth 1 -name '*.zip' | wc -l)
-          test "$count" -eq 35 || { echo "Expected 35 ZIPs, got $count"; exit 1; }
+      - name: Strict deep QA — must be 35/35 PASS
+        run: python tools/verify_templates.py templates/generated --deep --expect 35
       - name: Commit generated templates
         shell: bash
         run: |
@@ -39,5 +37,5 @@ jobs:
             echo "No generated changes"
             exit 0
           fi
-          git commit -m "build: generate 35 clean TT16 geodatabase templates [skip ci]"
+          git commit -m "build: regenerate 35 normalized TT16 templates [skip ci]"
           git push
