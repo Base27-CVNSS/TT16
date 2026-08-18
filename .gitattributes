@@ -1,0 +1,5 @@
+*.zip binary
+*.gdbtable binary
+*.gdbtablx binary
+*.spx binary
+*.atx binary
