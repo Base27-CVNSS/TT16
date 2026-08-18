@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""QA 35 ZIP FileGDB: CRC, 4 GDB, lớp, CRS và dữ liệu nền có sẵn."""
+"""Strict QA for normalized TT16 FileGDB ZIP templates."""
 from pathlib import Path
 import argparse
 import tempfile
@@ -7,28 +7,32 @@ import zipfile
 import shutil
 import sys
 
-GDBS = ["NenDiaHinh.gdb", "HienTrang.gdb", "QuyHoach.gdb", "MocGioi.gdb"]
-EXPECTED_QH_79 = {"ChiGioiXayDung_L", "ChiGioiDuongDo_L", "HanhLangAnToan_L"}
+EXPECTED_COUNTS = {
+    "NenDiaHinh.gdb": 4,
+    "HienTrang.gdb": 67,
+    "QuyHoach.gdb": 79,
+    "MocGioi.gdb": 3,
+}
+REQUIRED_QH = {"ChiGioiXayDung_L", "ChiGioiDuongDo_L", "HanhLangAnToan_L"}
 
 
 def inspect_zip(path: Path, deep: bool):
-    result = {"file": path.name, "zip_ok": True, "gdb": {}, "crs_count": None, "notes": []}
+    result = {"file": path.name, "errors": [], "notes": [], "gdb": {}, "crs_count": None}
     with zipfile.ZipFile(path) as z:
         bad = z.testzip()
         if bad:
-            result["zip_ok"] = False
-            result["notes"].append(f"CRC lỗi: {bad}")
+            result["errors"].append(f"CRC lỗi: {bad}")
         tops = {n.split('/')[0] for n in z.namelist() if n}
-        missing = [g for g in GDBS if g not in tops]
+        missing = [g for g in EXPECTED_COUNTS if g not in tops]
         if missing:
-            result["notes"].append("Thiếu: " + ", ".join(missing))
+            result["errors"].append("Thiếu GDB: " + ", ".join(missing))
         if not deep:
             return result
 
         try:
             import pyogrio
         except ImportError:
-            result["notes"].append("Chưa cài pyogrio; bỏ qua kiểm tra lớp/CRS")
+            result["errors"].append("Thiếu pyogrio; không thể chạy QA sâu")
             return result
 
         td = Path(tempfile.mkdtemp(prefix="tt16qa_"))
@@ -38,12 +42,15 @@ def inspect_zip(path: Path, deep: bool):
             nonempty = []
             qh_names = set()
 
-            for g in GDBS:
+            for g, expected in EXPECTED_COUNTS.items():
                 gp = td / g
                 if not gp.exists():
                     continue
                 layers = pyogrio.list_layers(gp)
-                result["gdb"][g] = int(len(layers))
+                actual = int(len(layers))
+                result["gdb"][g] = actual
+                if actual != expected:
+                    result["errors"].append(f"{g}: cần {expected} lớp, hiện có {actual}")
                 if g == "QuyHoach.gdb":
                     qh_names = {name for name, _ in layers}
 
@@ -52,27 +59,21 @@ def inspect_zip(path: Path, deep: bool):
                     crs = info.get("crs")
                     if crs:
                         crs_layers.setdefault(str(crs), []).append(f"{g}/{name}")
-                    if info.get("features", 0) > 0:
-                        nonempty.append((g, name, int(info["features"])))
+                    features = int(info.get("features", 0) or 0)
+                    if features > 0:
+                        nonempty.append((g, name, features))
 
             result["crs_count"] = len(crs_layers)
             if len(crs_layers) != 1:
-                result["notes"].append(f"Cảnh báo: phát hiện {len(crs_layers)} CRS trong các lớp")
-                for crs, names in crs_layers.items():
-                    result["notes"].append(f"  CRS {crs}: {len(names)} lớp")
+                result["errors"].append(f"Phải có đúng 1 CRS/template, phát hiện {len(crs_layers)} CRS")
 
-            if result["gdb"].get("QuyHoach.gdb") == 76:
-                absent = sorted(EXPECTED_QH_79 - qh_names)
-                result["notes"].append("Cảnh báo: QuyHoach.gdb chỉ có 76 lớp; thiếu: " + ", ".join(absent))
+            absent = sorted(REQUIRED_QH - qh_names)
+            if absent:
+                result["errors"].append("Thiếu lớp QuyHoach bắt buộc trong schema chuẩn hóa: " + ", ".join(absent))
 
-            if result["gdb"].get("NenDiaHinh.gdb") == 8:
-                result["notes"].append("Cảnh báo: NenDiaHinh.gdb có 8 lớp; kiểm tra nhóm hậu tố _1 và CRS")
-
-            bg = [(n, c) for g, n, c in nonempty if g == "NenDiaHinh.gdb"]
-            if bg:
-                result["notes"].append(
-                    "Lưu ý: template có dữ liệu nền sẵn: " + ", ".join(f"{n}={c} features" for n, c in bg)
-                )
+            if nonempty:
+                preview = ", ".join(f"{g}/{n}={c}" for g, n, c in nonempty[:8])
+                result["errors"].append("Clean template phải rỗng nhưng còn feature: " + preview)
         finally:
             shutil.rmtree(td, ignore_errors=True)
     return result
@@ -80,27 +81,33 @@ def inspect_zip(path: Path, deep: bool):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("path", nargs="?", default="templates", help="Thư mục chứa ZIP")
-    ap.add_argument("--deep", action="store_true", help="Đọc toàn bộ layer FileGDB bằng pyogrio")
+    ap.add_argument("path", nargs="?", default="templates/generated", help="Thư mục chứa ZIP")
+    ap.add_argument("--deep", action="store_true", help="Đọc layer/CRS/feature bằng pyogrio")
+    ap.add_argument("--expect", type=int, default=35, help="Số ZIP mong đợi; mặc định 35")
     args = ap.parse_args()
+
     files = sorted(Path(args.path).glob("*.zip"))
-    if not files:
-        print("Không tìm thấy ZIP", file=sys.stderr)
-        return 2
+    if len(files) != args.expect:
+        print(f"[FAIL] cần {args.expect} ZIP, hiện có {len(files)}", file=sys.stderr)
+        return 1
 
     failed = False
     for p in files:
         r = inspect_zip(p, args.deep)
-        state = "OK" if r["zip_ok"] and not any(n.startswith("Thiếu") for n in r["notes"]) else "FAIL"
+        state = "PASS" if not r["errors"] else "FAIL"
         print(f"[{state}] {r['file']}")
         if r["gdb"]:
             print("  " + ", ".join(f"{k}={v}" for k, v in r["gdb"].items()))
         if r["crs_count"] is not None:
             print(f"  CRS count={r['crs_count']}")
-        for n in r["notes"]:
-            print("  - " + n)
-        failed |= state == "FAIL"
-    return 1 if failed else 0
+        for e in r["errors"]:
+            print("  - ERROR: " + e)
+        failed |= bool(r["errors"])
+
+    if failed:
+        return 1
+    print(f"\nQA RESULT: {len(files)}/{len(files)} PASS")
+    return 0
 
 
 if __name__ == "__main__":
