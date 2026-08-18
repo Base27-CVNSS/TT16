@@ -8,6 +8,7 @@ grouping, aliases, numeric field dtypes, CRS variants, and known source anomalie
 from __future__ import annotations
 
 import argparse
+from concurrent.futures import ProcessPoolExecutor, as_completed
 import hashlib
 import json
 from pathlib import Path
@@ -134,6 +135,7 @@ def main():
     ap.add_argument("--schema-dir", default="schema")
     ap.add_argument("--out", default="templates/generated")
     ap.add_argument("--file", help="Chỉ build đúng một filename trong catalog")
+    ap.add_argument("--jobs", type=int, default=4, help="Số tiến trình build song song (mặc định 4)")
     args = ap.parse_args()
 
     catalog = load_catalog(Path(args.schema_dir))
@@ -145,9 +147,33 @@ def main():
 
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
+
+    # Nhiều tỉnh dùng byte-schema giống nhau (cùng CRS + biến thể). Build một lần
+    # cho mỗi cấu hình duy nhất rồi copy archive sang các tên tỉnh tương ứng.
+    groups = {}
+    for cfg in configs:
+        key = json.dumps([cfg["crs"], cfg["variant"], cfg.get("extra_layer_crs")], sort_keys=True, ensure_ascii=False)
+        groups.setdefault(key, []).append(cfg)
+
+    representatives = [(key, members[0]) for key, members in groups.items()]
+    built = {}
+    workers = max(1, min(args.jobs, len(representatives)))
+    with ProcessPoolExecutor(max_workers=workers) as pool:
+        futures = {pool.submit(build_one, catalog, cfg, out): key for key, cfg in representatives}
+        for i, fut in enumerate(as_completed(futures), 1):
+            key = futures[fut]
+            p = fut.result()
+            built[key] = p
+            print(f"[schema {i}/{len(representatives)}] {p.name}")
+
+    for key, members in groups.items():
+        source = built[key]
+        for cfg in members[1:]:
+            shutil.copy2(source, out / cfg["file"])
+
     rows = []
     for i, cfg in enumerate(configs, 1):
-        p = build_one(catalog, cfg, out)
+        p = out / cfg["file"]
         digest = sha256(p)
         rows.append((p.name, p.stat().st_size, digest, cfg["variant"]))
         print(f"[{i}/{len(configs)}] {p.name} {p.stat().st_size} bytes {digest[:12]}")
