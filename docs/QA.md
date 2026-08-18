@@ -17,7 +17,7 @@ Kết quả chi tiết theo file nằm tại `templates/index.csv`.
 ## Kết quả tổng quát
 
 - 35/35 ZIP có 4 khối: `NenDiaHinh.gdb`, `HienTrang.gdb`, `QuyHoach.gdb`, `MocGioi.gdb`.
-- Mỗi template có **01 CRS nội bộ** thống nhất giữa các GDB được kiểm tra.
+- 34/35 template có **01 CRS nội bộ** thống nhất trong các lớp đã kiểm tra; riêng Điện Biên có thêm nhóm lớp `_1` dùng CRS khác, cần xử lý trước ETL.
 - Cấu hình phổ biến: `NenDiaHinh=4`, `HienTrang=67`, `QuyHoach=79`, `MocGioi=3`.
 
 ## Vì sao 67/79 khác con số 70/81 trong Phụ lục II?
@@ -51,20 +51,28 @@ có cùng payload/schema và `QuyHoach.gdb` chỉ có **76 lớp**. So với tem
 
 **Khuyến nghị:** không nạp production trước khi bổ sung/đối chiếu đúng nhóm `QuyHoachCGDD_CGXDHanhLangHTKT` trong hệ thống GIS đích.
 
-## Khác biệt 2 — Điện Biên có 8 lớp NenDiaHinh
+## Khác biệt 2 — Điện Biên có 8 lớp NenDiaHinh và 2 CRS
 
-Template `11.DienBien...103-00...zip` có 4 lớp nền thông thường và thêm 4 lớp hậu tố `_1`:
+Template `11.DienBien...103-00...zip` có 4 lớp nền thông thường và thêm 4 lớp hậu tố `_1`. Kiểm tra sâu cho thấy nhóm chính và nhóm `_1` không cùng CRS (ví dụ `NenDiaHinh_L` và `NenDiaHinh_L_1` đọc ra hai CRS khác nhau):
 
 - `NenDiaHinh_L_1`
 - `DiemDoCao_P_1`
 - `DuongDongMuc_L_1`
 - `GhiChu_P_1`
 
-**Khuyến nghị:** xác định đây là duplicate tạm, biến thể nguồn hay dữ liệu cần giữ trước khi ETL; không xóa tự động.
+Trong phép kiểm tra hiện tại, 153 lớp đọc theo `EPSG:9205`, còn 4 lớp `_1` đọc theo `EPSG:9207`.
 
-## Khác biệt 3 — các tỉnh dùng cùng CRS có thể có ZIP trùng SHA-256
+**Khuyến nghị:** xác định đây là duplicate tạm, biến thể nguồn hay dữ liệu cần giữ trước khi ETL; không xóa tự động và không merge hai nhóm lớp trước khi reproject/chuẩn hóa CRS có chủ đích.
 
-Một số template có cùng kinh tuyến trục là byte-identical. Điều này phù hợp với cách tái sử dụng cùng một payload/template cho các địa phương có cùng cấu hình CRS; bản thân việc trùng hash không đủ để kết luận dữ liệu tỉnh bị nhầm. Lưu ý một số lớp nền trong gói nguồn có sẵn dữ liệu mẫu, vì vậy cần làm sạch mã hồ sơ/mã đối tượng trước khi dùng làm dữ liệu production.
+## Khác biệt 3 — template có dữ liệu nền có sẵn
+
+Kiểm tra sâu cho thấy `NenDiaHinh_L` không phải lớp rỗng trong các mẫu đã kiểm tra. Ví dụ Hà Nội và Cao Bằng đều có **21.986 feature**; Điện Biên có 21.986 feature ở `NenDiaHinh_L` và thêm 21.986 feature ở `NenDiaHinh_L_1`.
+
+Một số record đọc được mang mã hồ sơ/mã thông tin quy hoạch mẫu. Vì vậy trước khi dùng cho production phải kiểm tra và làm sạch dữ liệu mẫu, không coi toàn bộ `.gdb` là schema rỗng.
+
+## Khác biệt 4 — các tỉnh dùng cùng CRS có thể có ZIP trùng SHA-256
+
+Một số template có cùng kinh tuyến trục là byte-identical. Điều này phù hợp với cách tái sử dụng cùng một payload/template cho các địa phương có cùng cấu hình CRS; bản thân việc trùng hash không đủ để kết luận dữ liệu tỉnh bị nhầm.
 
 ## Bất nhất khác trong Phụ lục II cần lưu ý
 
@@ -78,4 +86,4 @@ Mô tả quy tắc ký tự `<x>` và ví dụ minh họa không hoàn toàn đ�
 
 ## Nguyên tắc của repository
 
-Repository giữ nguyên 35 ZIP nguồn và **ghi nhận QA**, không âm thầm chỉnh binary để tránh tạo ra một “mẫu được sửa” nhưng không có provenance/phê duyệt kỹ thuật.
+Repository ghi nhận nguyên trạng và checksum bộ 35 ZIP nguồn trong manifest; không âm thầm chỉnh binary để tránh tạo ra một “mẫu được sửa” nhưng không có provenance/phê duyệt kỹ thuật.
