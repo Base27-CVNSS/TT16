@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Build 35 CLEAN FileGDB templates from the extracted TT16 schema catalog.
+"""Build 35 normalized CLEAN FileGDB templates from the TT16 schema catalog.
 
-The supplied source archives contain sample/background features. This builder intentionally
-creates empty reusable schemas only. It preserves layer names, geometry types, feature-dataset
-grouping, aliases, numeric field dtypes, CRS variants, and known source anomalies when requested.
+The source archives are preserved only as provenance/QA references. Generated templates are
+production-oriented empty schemas: one CRS per template, 4 NenDiaHinh layers, 67 HienTrang
+layers, 79 QuyHoach layers and 3 MocGioi layers. Known source anomalies are intentionally
+normalized out of generated artifacts.
 """
 from __future__ import annotations
 
@@ -20,7 +21,12 @@ import geopandas as gpd
 import pandas as pd
 import pyogrio
 
-MISSING_QH_76 = {"ChiGioiXayDung_L", "ChiGioiDuongDo_L", "HanhLangAnToan_L"}
+EXPECTED_COUNTS = {
+    "NenDiaHinh.gdb": 4,
+    "HienTrang.gdb": 67,
+    "QuyHoach.gdb": 79,
+    "MocGioi.gdb": 3,
+}
 
 
 def empty_series(dtype: str):
@@ -55,37 +61,28 @@ def build_layer(gdb: Path, layer: dict, crs: str):
     )
 
 
-def add_dienbien_extra(gdb: Path, base_layers: list[dict], extra_crs: dict[str, str]):
-    by_name = {x["name"]: x for x in base_layers}
-    for extra_name, crs in extra_crs.items():
-        base_name = extra_name[:-2]
-        src = by_name[base_name]
-        dup = dict(src)
-        dup["name"] = extra_name
-        dup["feature_dataset"] = "NenDiaHinh_1"
-        build_layer(gdb, dup, crs)
-
-
 def zip_gdbs(work: Path, output_zip: Path):
     output_zip.parent.mkdir(parents=True, exist_ok=True)
     with zipfile.ZipFile(output_zip, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=9) as z:
-        for gdb in ["NenDiaHinh.gdb", "HienTrang.gdb", "QuyHoach.gdb", "MocGioi.gdb"]:
+        for gdb in EXPECTED_COUNTS:
             for fp in sorted((work / gdb).rglob("*")):
                 if fp.is_file():
                     z.write(fp, fp.relative_to(work).as_posix())
 
 
 def build_one(catalog: dict, cfg: dict, out_dir: Path):
+    """Build one normalized template.
+
+    `variant` and `extra_layer_crs` are retained in schema/configs.json only to document source
+    provenance. They are deliberately ignored here so every generated template conforms to the
+    same logical TT16 clean-schema contract.
+    """
     td = Path(tempfile.mkdtemp(prefix="tt16_clean_"))
     try:
         for gdb_name, layers in catalog["schema"].items():
             gp = td / gdb_name
             for layer in layers:
-                if cfg["variant"] == "qh76" and gdb_name == "QuyHoach.gdb" and layer["name"] in MISSING_QH_76:
-                    continue
                 build_layer(gp, layer, cfg["crs"])
-            if cfg["variant"] == "dienbien" and gdb_name == "NenDiaHinh.gdb":
-                add_dienbien_extra(gp, layers, cfg.get("extra_layer_crs", {}))
 
         target = out_dir / cfg["file"]
         zip_gdbs(td, target)
@@ -124,6 +121,15 @@ def load_catalog(schema_dir: Path):
         "QuyHoach.gdb": decode_layers(load("quy_hoach_1.json") + load("quy_hoach_2.json")),
         "MocGioi.gdb": decode_layers(load("moc_gioi.json")),
     }
+
+    for gdb_name, expected in EXPECTED_COUNTS.items():
+        actual = len(schema[gdb_name])
+        if actual != expected:
+            raise RuntimeError(
+                f"Schema catalog {gdb_name} phải có {expected} lớp, hiện có {actual}. "
+                "Không build để tránh phát hành template sai cấu trúc."
+            )
+
     configs = []
     for r in load("configs.json"):
         configs.append({"file": r[0], "crs": r[1], "variant": r[2], "extra_layer_crs": r[3]})
@@ -148,11 +154,11 @@ def main():
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
 
-    # Nhiều tỉnh dùng byte-schema giống nhau (cùng CRS + biến thể). Build một lần
-    # cho mỗi cấu hình duy nhất rồi copy archive sang các tên tỉnh tương ứng.
+    # Generated output is normalized, so uniqueness depends only on CRS. Build one payload per
+    # unique CRS and copy it to all province filenames that share the same coordinate system.
     groups = {}
     for cfg in configs:
-        key = json.dumps([cfg["crs"], cfg["variant"], cfg.get("extra_layer_crs")], sort_keys=True, ensure_ascii=False)
+        key = cfg["crs"]
         groups.setdefault(key, []).append(cfg)
 
     representatives = [(key, members[0]) for key, members in groups.items()]
@@ -175,11 +181,11 @@ def main():
     for i, cfg in enumerate(configs, 1):
         p = out / cfg["file"]
         digest = sha256(p)
-        rows.append((p.name, p.stat().st_size, digest, cfg["variant"]))
+        rows.append((p.name, p.stat().st_size, digest))
         print(f"[{i}/{len(configs)}] {p.name} {p.stat().st_size} bytes {digest[:12]}")
 
     manifest = out / "SHA256SUMS.txt"
-    manifest.write_text("".join(f"{h}  {name}\n" for name, _size, h, _v in rows), encoding="utf-8")
+    manifest.write_text("".join(f"{h}  {name}\n" for name, _size, h in rows), encoding="utf-8")
     print(f"Wrote {manifest}")
 
 
