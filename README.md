@@ -4,7 +4,7 @@
 
 [![Thông tư 16/2025/TT-BXD](https://img.shields.io/badge/TT-16%2F2025%2FTT--BXD-0b57d0)](https://vanban.chinhphu.vn/?classid=1&docid=214424&pageid=27160&typegroupid=6)
 [![VBHN 59/2026](https://img.shields.io/badge/VBHN-59%2FVBHN--BXD-0a7f39)](https://chinhphu.vn/?classid=2629&docid=218798&pageid=27160)
-[![Templates](https://img.shields.io/badge/Geodatabase-35%20templates-7a4)](./templates/)
+[![Templates](https://img.shields.io/badge/Geodatabase-35%20templates-7a4)](./templates/generated/)
 
 ## 1. Mục tiêu
 
@@ -15,7 +15,7 @@ Repository giúp cơ quan quản lý, đơn vị tư vấn và cán bộ lập q
 - `HoSoBASIC`: dữ liệu gốc có thể biên tập/in ấn.
 - `HoSoScan`: dữ liệu pháp lý được số hóa từ hồ sơ giấy hoặc chứng thực điện tử.
 - `HoSoGIS`: dữ liệu địa lý chuyển đổi từ dữ liệu gốc.
-- 35 template `.gdb` đóng gói theo từng hệ tọa độ/kinh tuyến trục trong bộ dữ liệu bạn cung cấp.
+- 35 **Clean Template FileGDB** tái tạo từ schema bộ dữ liệu nguồn, tách sạch feature mẫu, theo từng hệ tọa độ/kinh tuyến trục.
 - Tài liệu quy trình, checklist và báo cáo QA cho chính các template trong repo.
 
 > [!IMPORTANT]
@@ -166,7 +166,7 @@ Ngoài các trường tối thiểu, từng lớp cần trường bổ sung ph�
 
 ## 7. Trọn bộ 35 template
 
-Các ZIP nằm trong [`templates/`](./templates/). Mỗi ZIP chứa 4 File Geodatabase: `NenDiaHinh.gdb`, `HienTrang.gdb`, `QuyHoach.gdb`, `MocGioi.gdb`.
+Bộ dùng trực tiếp nằm trong [`templates/generated/`](./templates/generated/). Mỗi ZIP chứa 4 File Geodatabase: `NenDiaHinh.gdb`, `HienTrang.gdb`, `QuyHoach.gdb`, `MocGioi.gdb`. Đây là **Clean Template** được tái tạo từ schema nguồn và loại bỏ toàn bộ feature mẫu; checksum/QA của bộ nguồn được lưu tại [`templates/index.csv`](./templates/index.csv). Xem cơ chế tái tạo tại **[docs/CLEAN_TEMPLATES.md](./docs/CLEAN_TEMPLATES.md)**.
 
 | # | Mã | Tỉnh/Thành hoặc mẫu | Kinh tuyến trục trong template | HT/QH/MG | QA |
 |---:|---:|---|---:|---:|:--:|
@@ -210,7 +210,7 @@ Chi tiết kích thước, SHA-256 và ghi chú QA: **[`templates/index.csv`](./
 
 ## 8. Cách chọn và dùng template
 
-1. Vào `templates/`, chọn ZIP đúng địa phương/hệ tọa độ của dự án.
+1. Vào `templates/generated/`, chọn ZIP đúng địa phương/hệ tọa độ của dự án.
 2. Kiểm tra lại **hệ tọa độ, kinh tuyến trục và phạm vi dự án** với hồ sơ khảo sát/đo đạc; không chọn chỉ dựa vào tên file.
 3. Giải nén ZIP vào `CSDL_<TenDoAn>/HoSoGIS/`.
 4. **Không đổi tên tùy tiện** feature class/feature dataset nếu chưa có mapping rõ ràng.
@@ -222,14 +222,14 @@ Chi tiết kích thước, SHA-256 và ghi chú QA: **[`templates/index.csv`](./
 QA nhanh archive:
 
 ```bash
-python tools/verify_templates.py templates
+python tools/verify_templates.py templates/generated
 ```
 
 QA sâu FileGDB:
 
 ```bash
 pip install -r requirements-qa.txt
-python tools/verify_templates.py templates --deep
+python tools/verify_templates.py templates/generated --deep
 ```
 
 ## 9. Ba điểm cần đặc biệt lưu ý khi triển khai
@@ -248,7 +248,7 @@ Repository **không tự sửa nghĩa pháp lý** của các bất nhất này; 
 ### C. QA bộ template đã phát hiện 2 nhóm khác biệt
 
 - Các template kinh tuyến trục **105°45′** của Cao Bằng, Hải Phòng, TP.HCM và Tây Ninh có `QuyHoach.gdb` **76 lớp**, thiếu `ChiGioiXayDung_L`, `ChiGioiDuongDo_L`, `HanhLangAnToan_L` so với mẫu 79 lớp.
-- Template Điện Biên có `NenDiaHinh.gdb` **8 lớp** do tồn tại thêm 4 lớp hậu tố `_1` trùng logic với 4 lớp nền chính.
+- Template Điện Biên có `NenDiaHinh.gdb` **8 lớp** do tồn tại thêm 4 lớp hậu tố `_1`; kiểm tra sâu cho thấy nhóm `_1` còn dùng CRS khác nhóm lớp chính, vì vậy phải chuẩn hóa có chủ đích trước ETL.
 
 Xem đầy đủ: **[docs/QA.md](./docs/QA.md)**.
 
@@ -282,18 +282,19 @@ Chi tiết link: **[docs/PHAP_LY.md](./docs/PHAP_LY.md)**.
 TT16/
 ├── README.md
 ├── templates/
-│   ├── 01.HaNoi....zip
-│   ├── ... 33 template khác ...
-│   ├── CTDL_..._Mui6_gdb_template.zip
-│   └── index.csv
+│   ├── generated/                 # 35 Clean Template ZIP + SHA256SUMS
+│   └── index.csv                  # manifest/checksum bộ nguồn đã QA
 ├── docs/
 │   ├── QUY_TRINH.md
 │   ├── CHECKLIST.md
 │   ├── METADATA.md
 │   ├── QA.md
-│   └── PHAP_LY.md
+│   ├── PHAP_LY.md
+│   └── CLEAN_TEMPLATES.md
+├── schema/                        # catalog schema/CRS để tái tạo GDB
 ├── tools/
 │   ├── scaffold.py
+│   ├── build_clean_templates.py
 │   └── verify_templates.py
 └── requirements-qa.txt
 ```
