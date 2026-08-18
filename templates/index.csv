@@ -1,0 +1,36 @@
+stt,ma_dvhc,dia_phuong,file,kinh_tuyen_truc,nen_dia_hinh_layers,hien_trang_layers,quy_hoach_layers,moc_gioi_layers,size_bytes,sha256,qa_note
+1,01,Hà Nội,01.HaNoi.CTDL_QuyHoachDTNT_TT16_VN2000_105-00_gdb_template.zip,105°00′,4,67,79,3,2111963,aa63dac82f7ec88a583bc4dc61a70c547fca52ddb38fea95f308899270d69cff,
+2,04,Cao Bằng,04.CaoBang.CTDL_QuyHoachDTNT_TT16_VN2000_105-45_gdb_template.zip,105°45′,4,67,76,3,2102565,3ffae9ccd673cbff1565647760ecfb7641e75d622321ebc813afc86564ed5fe2,Thiếu 3 lớp chỉ giới/hành lang so với template chuẩn 79 lớp
+3,08,Tuyên Quang,08.TuyenQuang.CTDL_QuyHoachDTNT_TT16_VN2000_106-00_gdb_template.zip,106°00′,4,67,79,3,2107836,140a706e8b76e12714f9d7df7068c1c872f1e413b42e782b6304b581ea2f907f,
+4,11,Điện Biên,11.DienBien.CTDL_QuyHoachDTNT_TT16_VN2000_103-00_gdb_template.zip,103°00′,8,67,79,3,3647140,896ee5f011356227b2dffbcfe64e5e434066f1c48f5eb184c8353d346288ee6b,Có 4 lớp _1 trong NenDiaHinh; kiểm tra sâu phát hiện 2 CRS trong nhóm nền
+5,12,Lai Châu,12.LaiChau.CTDL_QuyHoachDTNT_TT16_VN2000_104-45_gdb_template.zip,104°45′,4,67,79,3,2113749,4cad4be707088c81868a19cf600ffb607f30668282fc30aeea82dded7ab5e299,
+6,14,Sơn La,14.SonLa.CTDL_QuyHoachDTNT_TT16_VN2000_104-00_gdb_template.zip,104°00′,4,67,79,3,2112982,4a77a07c4bc907c20e6c4bde6ae07bc8a549f3fffd493d9ada5bd9d1c19f3b46,
+7,15,Lào Cai,15.LaoCai.CTDL_QuyHoachDTNT_TT16_VN2000_104-45_gdb_template.zip,104°45′,4,67,79,3,2113749,4cad4be707088c81868a19cf600ffb607f30668282fc30aeea82dded7ab5e299,
+8,19,Thái Nguyên,19.ThaiNguyen.CTDL_QuyHoachDTNT_TT16_VN2000_106-30_gdb_template.zip,106°30′,4,67,79,3,2107796,6c3f59351d90f39f2cdc5b9c1c0d683b1817596c61b0096353f08a8df26453d6,
+9,20,Lạng Sơn,20.LangSon.CTDL_QuyHoachDTNT_TT16_VN2000_107-15_gdb_template.zip,107°15′,4,67,79,3,2101032,a0f9b423f5c75e3ca3081e3d346d2256f9b1330781575d5d9b6591f24e0e3a55,
+10,22,Quảng Ninh,22.QuangNinh.CTDL_QuyHoachDTNT_TT16_VN2000_107-45_gdb_template.zip,107°45′,4,67,79,3,2093887,bb09f21a04e7f7f2afa86f62282bd15d066fcb66ce1ff2dc50e5f59a28b127fc,
+11,24,Bắc Ninh,24.BacNinh.CTDL_QuyHoachDTNT_TT16_VN2000_107-00_gdb_template.zip,107°00′,4,67,79,3,2101553,f3bc48aa2f94cc2fb68f9ad01a0b9c3915e73fea1946087ddd910f42b8bad7b7,
+12,25,Phú Thọ,25.PhuTho.CTDL_QuyHoachDTNT_TT16_VN2000_104-45_gdb_template.zip,104°45′,4,67,79,3,2113749,4cad4be707088c81868a19cf600ffb607f30668282fc30aeea82dded7ab5e299,
+13,31,Hải Phòng,31.HaiPhong.CTDL_QuyHoachDTNT_TT16_VN2000_105-45_gdb_template.zip,105°45′,4,67,76,3,2102565,3ffae9ccd673cbff1565647760ecfb7641e75d622321ebc813afc86564ed5fe2,Thiếu 3 lớp chỉ giới/hành lang so với template chuẩn 79 lớp
+14,33,Hưng Yên,33.HungYen.CTDL_QuyHoachDTNT_TT16_VN2000_105-30_gdb_template.zip,105°30′,4,67,79,3,2111279,2c7243fee451be5efdbfeda9f0c6b95dbb93ac85701486f4c4e51fb1ed2d44de,
+15,37,Ninh Bình,37.NinhBinh.CTDL_QuyHoachDTNT_TT16_VN2000_105-00_gdb_template.zip,105°00′,4,67,79,3,2111963,aa63dac82f7ec88a583bc4dc61a70c547fca52ddb38fea95f308899270d69cff,
+16,38,Thanh Hóa,38.ThanhHoa.CTDL_QuyHoachDTNT_TT16_VN2000_105-00_gdb_template.zip,105°00′,4,67,79,3,2111963,aa63dac82f7ec88a583bc4dc61a70c547fca52ddb38fea95f308899270d69cff,
+17,40,Nghệ An,40.NgheAn.CTDL_QuyHoachDTNT_TT16_VN2000_104-45_gdb_template.zip,104°45′,4,67,79,3,2113749,4cad4be707088c81868a19cf600ffb607f30668282fc30aeea82dded7ab5e299,
+18,42,Hà Tĩnh,42.HaTinh.CTDL_QuyHoachDTNT_TT16_VN2000_105-30_gdb_template.zip,105°30′,4,67,79,3,2111279,2c7243fee451be5efdbfeda9f0c6b95dbb93ac85701486f4c4e51fb1ed2d44de,
+19,44,Quảng Trị,44.QuangTri.CTDL_QuyHoachDTNT_TT16_VN2000_106-00_gdb_template.zip,106°00′,4,67,79,3,2107836,140a706e8b76e12714f9d7df7068c1c872f1e413b42e782b6304b581ea2f907f,
+20,46,Huế,46.Hue.CTDL_QuyHoachDTNT_TT16_VN2000_107-00_gdb_template.zip,107°00′,4,67,79,3,2101553,f3bc48aa2f94cc2fb68f9ad01a0b9c3915e73fea1946087ddd910f42b8bad7b7,
+21,48,Đà Nẵng,48.DaNang.CTDL_QuyHoachDTNT_TT16_VN2000_107-45_gdb_template.zip,107°45′,4,67,79,3,2093887,bb09f21a04e7f7f2afa86f62282bd15d066fcb66ce1ff2dc50e5f59a28b127fc,
+22,51,Quảng Ngãi,51.QuangNgai.CTDL_QuyHoachDTNT_TT16_VN2000_108-00_gdb_template.zip,108°00′,4,67,79,3,2083838,702df0bc51fa96fc49a42cdf1e1c4667e863abea094df4452c4c109fd265c296,
+23,52,Gia Lai,52.GiaLai.CTDL_QuyHoachDTNT_TT16_VN2000_108-15_gdb_template.zip,108°15′,4,67,79,3,1962972,8fa3165b05ce1974a9ffffc7098bb5207c81b3695cfb153576008ef42baf21aa,
+24,56,Khánh Hòa,56.KhanhHoa.CTDL_QuyHoachDTNT_TT16_VN2000_108-15_gdb_template.zip,108°15′,4,67,79,3,1962972,8fa3165b05ce1974a9ffffc7098bb5207c81b3695cfb153576008ef42baf21aa,
+25,66,Đắk Lắk,66.DakLak.CTDL_QuyHoachDTNT_TT16_VN2000_108-30_gdb_template.zip,108°30′,4,67,79,3,2084951,efb0848618441f0ae1a866cb0cacdd39a1d161a529e9abfa4f70ea447ec6d14e,
+26,68,Lâm Đồng,68.LamDong.CTDL_QuyHoachDTNT_TT16_VN2000_107-45_gdb_template.zip,107°45′,4,67,79,3,2093887,bb09f21a04e7f7f2afa86f62282bd15d066fcb66ce1ff2dc50e5f59a28b127fc,
+27,75,Đồng Nai,75.DongNai.CTDL_QuyHoachDTNT_TT16_VN2000_107-45_gdb_template.zip,107°45′,4,67,79,3,2093887,bb09f21a04e7f7f2afa86f62282bd15d066fcb66ce1ff2dc50e5f59a28b127fc,
+28,79,TP. Hồ Chí Minh,79.HCM.CTDL_QuyHoachDTNT_TT16_VN2000_105-45_gdb_template.zip,105°45′,4,67,76,3,2102565,3ffae9ccd673cbff1565647760ecfb7641e75d622321ebc813afc86564ed5fe2,Thiếu 3 lớp chỉ giới/hành lang so với template chuẩn 79 lớp
+29,80,Tây Ninh,80.TayNinh.CTDL_QuyHoachDTNT_TT16_VN2000_105-45_gdb_template.zip,105°45′,4,67,76,3,2102565,3ffae9ccd673cbff1565647760ecfb7641e75d622321ebc813afc86564ed5fe2,Thiếu 3 lớp chỉ giới/hành lang so với template chuẩn 79 lớp
+30,82,Đồng Tháp,82.DongThap.CTDL_QuyHoachDTNT_TT16_VN2000_105-00_gdb_template.zip,105°00′,4,67,79,3,2111963,aa63dac82f7ec88a583bc4dc61a70c547fca52ddb38fea95f308899270d69cff,
+31,86,Vĩnh Long,86.VinhLong.CTDL_QuyHoachDTNT_TT16_VN2000_105-30_gdb_template.zip,105°30′,4,67,79,3,2111279,2c7243fee451be5efdbfeda9f0c6b95dbb93ac85701486f4c4e51fb1ed2d44de,
+32,91,An Giang,91.AnGiang.CTDL_QuyHoachDTNT_TT16_VN2000_104-45_gdb_template.zip,104°45′,4,67,79,3,2113749,4cad4be707088c81868a19cf600ffb607f30668282fc30aeea82dded7ab5e299,
+33,92,Cần Thơ,92.CanTho.CTDL_QuyHoachDTNT_TT16_VN2000_105-00_gdb_template.zip,105°00′,4,67,79,3,2111963,aa63dac82f7ec88a583bc4dc61a70c547fca52ddb38fea95f308899270d69cff,
+34,96,Cà Mau,96.CaMau.CTDL_QuyHoachDTNT_TT16_VN2000_104-30_gdb_template.zip,104°30′,4,67,79,3,2112891,5f3712561e4fc8c95601cc880702ac6f6e7a56232db9a267d0fc055d0e9cce24,
+35,,Mẫu liên tỉnh / múi chiếu 6°,CTDL_QuyHoachDTNT_TT16_VN2000_105-00_Mui6_gdb_template.zip,105°00′,4,67,79,3,2114198,b6df085d49eeaf89f709a23057b47d73a4d1fa85ca621e4d5050369182f00305,
