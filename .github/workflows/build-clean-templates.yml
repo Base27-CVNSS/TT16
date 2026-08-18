@@ -1,0 +1,43 @@
+name: Build clean TT16 templates
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "schema/**"
+      - "tools/build_clean_templates.py"
+      - ".github/workflows/build-clean-templates.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install GIS dependencies
+        run: python -m pip install --upgrade pip geopandas pyogrio pandas
+      - name: Build 35 clean FileGDB ZIPs
+        run: python tools/build_clean_templates.py --out templates/generated --jobs 4
+      - name: Sanity check package count
+        shell: bash
+        run: |
+          count=$(find templates/generated -maxdepth 1 -name '*.zip' | wc -l)
+          test "$count" -eq 35 || { echo "Expected 35 ZIPs, got $count"; exit 1; }
+      - name: Commit generated templates
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add templates/generated
+          if git diff --cached --quiet; then
+            echo "No generated changes"
+            exit 0
+          fi
+          git commit -m "build: generate 35 clean TT16 geodatabase templates [skip ci]"
+          git push
